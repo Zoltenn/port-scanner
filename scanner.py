@@ -1,6 +1,25 @@
 import socket, threading, time
 
-def scanner(ip, ports, tcp=True, udp=False):
+def scanner(ip, ports, tcp=True, udp=False) -> tuple:
+    '''
+    Scans port(s) of the target IP.
+
+    Parameters
+        ----------\n
+        ip : str
+            Target IP for which to port scan
+        ports : int or an iterable type of int 
+            A port number, or list of, to scan on target IP
+        tcp : bool
+            Set True for TCP port scanning; Default = True
+        udp : bool
+            UDP scanning feature is not yet supported.
+
+    Returns
+        -------
+        tuple(dict, float)
+            A dictionary of <port:status>, a float of time elapsed during scan
+    '''
     # start timer
     start = time.time()
     open_ports = {}
@@ -14,8 +33,8 @@ def scanner(ip, ports, tcp=True, udp=False):
                 t = threading.Thread(target=tcp_scan, args=(ip, ports[i], open_ports))
                 threads.append(t)
 
-            for i in range(len(threads)):
-                threads[i].start()
+            for t in threads:
+                t.start()
             
             for t in threads:
                 t.join()
@@ -29,8 +48,13 @@ def scanner(ip, ports, tcp=True, udp=False):
     
     # TODO: udp section
     elif udp and not tcp:
-        print('Feature not yet supported')
-        return ValueError
+        return print('UDP feature not yet supported')
+
+    elif tcp and udp:
+        return print('UDP feature not yet supported')
+
+    else:
+        return print('Please choose')
     
     # stop timer
     end = time.time()
@@ -49,7 +73,7 @@ def tcp_scan(ip: str, port: int, open_ports):
 
 
 def udp_scan(ip: str, port: int):
-    # TODO: udp scanner utility
+    # TODO:  udp scanner utility
     pass
 
 
@@ -57,7 +81,11 @@ ip = input('Input target IP: ')
 ports = range(65536)
 port_dict, time = scanner(ip, ports)
 
-print('\n' + 'Scanner finished in ' + str(time) + ' seconds')
+count = 0
 for k,v in port_dict.items():
     if v == 'open':
+        count += 1
         print('Port ' + str(k), ' is ' + v)
+print('\n', count, 'TCP ports are open.')
+print('Scanner finished in ' + str(time) + ' seconds')
+
