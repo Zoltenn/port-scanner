@@ -41,7 +41,7 @@ def scanner(ip, ports, tcp=True, udp=False) -> tuple:
 
         elif type(ports) is int:
             # single port passed
-            tcp_scan(ip, ports)
+            return tcp_scan(ip, ports), time.time()-start
 
         else:
             print('Please ensure ports numbers are integers or an iterable series of them.')
@@ -54,22 +54,21 @@ def scanner(ip, ports, tcp=True, udp=False) -> tuple:
         return print('UDP feature not yet supported')
 
     else:
-        return print('Please choose')
+        return print('Please choose a scan type')
     
     # stop timer
     end = time.time()
     return open_ports, end-start
 
-def tcp_scan(ip: str, port: int, open_ports):
+def tcp_scan(ip: str, port: int, open_ports={}):
     try:
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        # set socket option to reuse identical sockets
-        s.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
-        s.settimeout(0.5)
+        s.settimeout(0.25)
         s.connect((ip, port))
         open_ports[port] = 'open'
     except:
         open_ports[port] = 'closed'
+    return open_ports
 
 
 def udp_scan(ip: str, port: int):
@@ -88,4 +87,3 @@ for k,v in port_dict.items():
         print('Port ' + str(k), ' is ' + v)
 print('\n', count, 'TCP ports are open.')
 print('Scanner finished in ' + str(time) + ' seconds')
-
